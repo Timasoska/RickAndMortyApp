@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -18,13 +19,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun Base_Url() = Constants.BASE_URL
+    fun provideBaseUrl() = Constants.BASE_URL
 
     @Provides
     @Singleton
-    fun provideLoggingInterceptor(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor {
+        return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+    }
+
+    @Singleton
+    @Provides
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor) : OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS) //Таймаут на установку соединения
+            .readTimeout(30, TimeUnit.SECONDS) // Таймаут на чтение данныъ
+            .writeTimeout(30, TimeUnit.SECONDS) // Таймаут на запись
             .build()
     }
 
@@ -32,7 +42,7 @@ object AppModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Base_Url())
+            .baseUrl(provideBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
