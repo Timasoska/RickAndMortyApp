@@ -21,7 +21,6 @@ interface RickAndMortyApi {
         @Query("name") name: String? = null,
         @Query("type") type: String? = null,
         @Query("species") species: String? = null,
-
     ): CharacterResponse //По странице получаем персонажа
 
     @GET("character/{id}")
@@ -45,6 +44,8 @@ interface RickAndMortyApi {
 
     @GET("location/{ids}")
     suspend fun getMultipleLocations(@Path("ids")ids: String): List<Location>
+
+    //Для Episode
 
     @GET("episode")
     suspend fun getEpisodes(
