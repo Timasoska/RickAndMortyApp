@@ -24,7 +24,7 @@ interface RickAndMortyApi {
     ): CharacterResponse //По странице получаем персонажа
 
     @GET("character/{id}")
-    suspend fun getCharacterById(@Path("id") id: Int): Character
+    suspend fun getCharacterById(@Path("id") id: Int): com.example.rickandmortyapp.data.dto.Character
 
     @GET("character/{ids}")
     suspend fun getMultipleCharacters(@Path("ids") ids: String): List<Character>

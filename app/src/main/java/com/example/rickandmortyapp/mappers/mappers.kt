@@ -8,7 +8,7 @@ import com.example.rickandmortyapp.domain.model.EpisodeInfo
 import com.example.rickandmortyapp.domain.model.LocationInfo
 
 
-fun Character.toDomainModel(): CharacterInfo{
+fun Character.toCharacterInfo(): CharacterInfo{
     return CharacterInfo(
         id = this.id,
         name = this.name,
@@ -20,7 +20,7 @@ fun Character.toDomainModel(): CharacterInfo{
     )
 }
 
-fun Episode.toDomainModel(): EpisodeInfo {
+fun Episode.toEpisodeInfo(): EpisodeInfo {
     return EpisodeInfo(
         id = this.id,
         name = this.name,
@@ -29,7 +29,7 @@ fun Episode.toDomainModel(): EpisodeInfo {
     )
 }
 
-fun Location.toDomainModel(): LocationInfo {
+fun Location.toLocationInfo(): LocationInfo {
     return LocationInfo(
         id = this.id,
         name = this.name,

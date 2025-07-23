@@ -3,18 +3,20 @@ package com.example.rickandmortyapp.data.repository
 import com.example.rickandmortyapp.data.remote.RickAndMortyApi
 import com.example.rickandmortyapp.domain.model.CharacterInfo
 import com.example.rickandmortyapp.domain.repository.CharacterRepository
-import com.example.rickandmortyapp.mappers.toDomainModel
+import com.example.rickandmortyapp.mappers.toCharacterInfo
+import com.example.rickandmortyapp.mappers.toCharacterInfo
 import com.example.rickandmortyapp.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import okio.IOException
 import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class CharacterRepositoryImpl @Inject constructor(
     private val api: RickAndMortyApi
 ) : CharacterRepository {
+
+
     override fun getCharacters(
         page: Int,
         status: String?,
@@ -27,7 +29,7 @@ class CharacterRepositoryImpl @Inject constructor(
         emit(Resource.Loading()) //Эмитим состояние загрузки
 
         try {
-            val ApiResponse = api.getCharacters(
+            val apiResponse = api.getCharacters(
                 page = page,
                 status = status,
                 gender = gender,
@@ -35,8 +37,8 @@ class CharacterRepositoryImpl @Inject constructor(
                 type = type,
                 species = species
             )
-            val domainData = ApiResponse.results.map { it.toDomainModel() } // мапим список в готовые домен модели
-            emit(Resource.Success(domainData)) //Эмитим готовый список
+            val getCharacterData = apiResponse.results.map { it.toCharacterInfo() } // мапим список в готовые домен модели
+            emit(Resource.Success(getCharacterData)) //Эмитим готовый список
 
         } catch (e: HttpException) { // Ловим ошибки HTTP (404, 508 и ТД)
             emit(Resource.Error("Ошибка сервера: ${e.message}")) //Эмитим ошибку
@@ -47,7 +49,17 @@ class CharacterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCharacterById(id: Int): Resource<CharacterInfo> {
-        TODO("Not yet implemented")
+        return try {
+            val apiResponse = api.getCharacterById(id)
+            val getCharacterByIdData = apiResponse.toCharacterInfo()
+
+            Resource.Success(getCharacterByIdData)
+
+        } catch (e: HttpException) {
+            Resource.Error("Ошибка сервера: ${e.message}")
+        } catch (e: IOException) {
+            Resource.Error("Нет подключения к сети. Проверьте интернет")
+        }
     }
 
     override suspend fun getMultipleCharacters(ids: List<Int>): Resource<List<CharacterInfo>> {
