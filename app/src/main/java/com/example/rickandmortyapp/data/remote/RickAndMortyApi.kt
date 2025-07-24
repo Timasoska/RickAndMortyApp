@@ -1,5 +1,6 @@
 package com.example.rickandmortyapp.data.remote
 
+import com.example.rickandmortyapp.data.dto.Character
 import com.example.rickandmortyapp.data.dto.CharacterResponse
 import com.example.rickandmortyapp.data.dto.Episode
 import com.example.rickandmortyapp.data.dto.EpisodeResponse

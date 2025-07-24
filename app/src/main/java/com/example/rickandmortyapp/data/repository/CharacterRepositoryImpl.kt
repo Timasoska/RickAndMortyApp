@@ -4,7 +4,6 @@ import com.example.rickandmortyapp.data.remote.RickAndMortyApi
 import com.example.rickandmortyapp.domain.model.CharacterInfo
 import com.example.rickandmortyapp.domain.repository.CharacterRepository
 import com.example.rickandmortyapp.mappers.toCharacterInfo
-import com.example.rickandmortyapp.mappers.toCharacterInfo
 import com.example.rickandmortyapp.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -63,7 +62,19 @@ class CharacterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMultipleCharacters(ids: List<Int>): Resource<List<CharacterInfo>> {
-        TODO("Not yet implemented")
+        return try {
+            val idsAsString = ids.joinToString(separator = ",") //Подготавливаем данные в строку для апи
+            val getMultipleCharactersData = api.getMultipleCharacters(idsAsString) // Вызываем апи
+            val domainCharacters = getMultipleCharactersData.map { it.toCharacterInfo() } //Маппим их из листа в доменную модель
+
+            Resource.Success(domainCharacters)
+
+        } catch (e: HttpException) {
+            Resource.Error("Ошибка сервера: ${e.message}")
+        } catch (e: IOException) {
+            Resource.Error("Нет подключения к сети. Проверьте интернет")
+        }
+
     }
 
 }
