@@ -51,6 +51,8 @@ dependencies {
     //Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    testImplementation(libs.turbine)
+
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)

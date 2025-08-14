@@ -1,9 +1,11 @@
 package com.example.rickandmortyapp.data.repository
 
+import androidx.compose.ui.unit.Constraints
 import com.example.rickandmortyapp.data.remote.RickAndMortyApi
 import com.example.rickandmortyapp.domain.model.CharacterInfo
 import com.example.rickandmortyapp.domain.repository.CharacterRepository
 import com.example.rickandmortyapp.mappers.toCharacterInfo
+import com.example.rickandmortyapp.utils.Constants
 import com.example.rickandmortyapp.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -40,9 +42,9 @@ class CharacterRepositoryImpl @Inject constructor(
             emit(Resource.Success(getCharacterData)) //Эмитим готовый список
 
         } catch (e: HttpException) { // Ловим ошибки HTTP (404, 508 и ТД)
-            emit(Resource.Error("Ошибка сервера: ${e.message}")) //Эмитим ошибку
+            emit(Resource.Error("${Constants.ServerErrorMessage} ${e.message}")) //Эмитим ошибку
         } catch (e: IOException) { // Ловим ошибки сети (нет интернета)
-            emit(Resource.Error( "Нет подключения к сети. Проверьте интернет")) //Эмитим ошибку
+            emit(Resource.Error("${Constants.NetworkErrorMessage} ${e.message}")) //Эмитим ошибку
         }
 
     }
@@ -55,9 +57,9 @@ class CharacterRepositoryImpl @Inject constructor(
             Resource.Success(getCharacterByIdData)
 
         } catch (e: HttpException) {
-            Resource.Error("Ошибка сервера: ${e.message}")
+            Resource.Error("${Constants.ServerErrorMessage} ${e.message}")
         } catch (e: IOException) {
-            Resource.Error("Нет подключения к сети. Проверьте интернет")
+            Resource.Error("${Constants.NetworkErrorMessage} ${e.message}")
         }
     }
 
@@ -70,9 +72,9 @@ class CharacterRepositoryImpl @Inject constructor(
             Resource.Success(domainCharacters)
 
         } catch (e: HttpException) {
-            Resource.Error("Ошибка сервера: ${e.message}")
+            Resource.Error("${Constants.ServerErrorMessage} ${e.message}")
         } catch (e: IOException) {
-            Resource.Error("Нет подключения к сети. Проверьте интернет")
+            Resource.Error("${Constants.NetworkErrorMessage} ${e.message}")
         }
 
     }
