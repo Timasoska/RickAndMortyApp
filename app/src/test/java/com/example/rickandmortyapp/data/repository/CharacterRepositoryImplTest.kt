@@ -8,13 +8,21 @@ import com.example.rickandmortyapp.data.dto.Character
 import com.example.rickandmortyapp.data.dto.CharacterResponse
 import com.example.rickandmortyapp.data.dto.PageInfo
 import com.example.rickandmortyapp.domain.model.CharacterInfo
+import com.example.rickandmortyapp.utils.Constants
 import com.example.rickandmortyapp.utils.Resource
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Before
 import org.junit.Test
+import retrofit2.HttpException
+import retrofit2.Response
+import kotlin.test.assertFailsWith
 
 
 class CharacterRepositoryImplTest {
@@ -63,5 +71,35 @@ class CharacterRepositoryImplTest {
             awaitComplete()
         }
     }
+
+
+    @Test
+    fun `getCharacters should emit Loading then Error WHEN api call fails with HttpException`() = runTest {
+
+        val errorBody = "Internal Server Error".toResponseBody(null) //Тело фейковой ошибки
+
+        val fakeErrorResponse = Response.error<CharacterResponse>(500,errorBody)
+
+        val httpException = HttpException(fakeErrorResponse)
+
+        val expectedErrorMessage = "Ошибка сервера"
+
+        coEvery { mockApi.getCharacters(any(),any(),any(),any(), any(),any())} throws httpException
+
+        repository.getCharacters(1).test {
+            val loadingState = awaitItem()
+            assertThat(loadingState).isInstanceOf(Resource.Loading::class.java)
+
+            val errorState = awaitItem()
+            assertThat(errorState).isInstanceOf(Resource.Error::class.java)
+
+            val actualMessage = (errorState as Resource.Error).message
+            assertThat(actualMessage).contains(expectedErrorMessage)
+
+            awaitComplete()
+        }
+    }
+
 }
+
 
