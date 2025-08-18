@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.IOException
 import org.junit.Before
 import org.junit.Test
 import retrofit2.HttpException
@@ -98,6 +99,31 @@ class CharacterRepositoryImplTest {
 
             awaitComplete()
         }
+    }
+
+    @Test
+    fun `getCharacters should emit Loading then Error When api calls fails with IoException`() = runTest {
+
+
+        val ioException = IOException()
+
+        val expectedErrorMessage = "Нет подключения к сети"
+
+        coEvery { mockApi.getCharacters(any(),any(),any(),any(),any(),any()) } throws ioException
+
+        repository.getCharacters(1).test {
+            val loadingState = awaitItem()
+            assertThat(loadingState).isInstanceOf(Resource.Loading::class.java)
+
+            val errorState = awaitItem()
+            assertThat(errorState).isInstanceOf(Resource.Error::class.java)
+
+            val actualMessage = (errorState as Resource.Error).message
+            assertThat(actualMessage).contains(expectedErrorMessage)
+
+            awaitComplete()
+        }
+
     }
 
 }
