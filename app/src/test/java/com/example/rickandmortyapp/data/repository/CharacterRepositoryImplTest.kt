@@ -104,7 +104,6 @@ class CharacterRepositoryImplTest {
     @Test
     fun `getCharacters should emit Loading then Error When api calls fails with IoException`() = runTest {
 
-
         val ioException = IOException()
 
         val expectedErrorMessage = "Нет подключения к сети"
@@ -123,8 +122,33 @@ class CharacterRepositoryImplTest {
 
             awaitComplete()
         }
-
     }
+
+    @Test
+    fun `getCharactersById should return Success with correct character data`() = runTest {
+
+        val fakeApiResponse = Character(
+            id = 1, name = "Rick", status = "Alive", species = "Human", type = "",
+            gender = "Male", origin = Origin("Earth", ""), location = LocationShort("", ""),
+            image = "url", episode = emptyList(), url = "", created = ""
+        )
+
+        val fakeExpectedData = CharacterInfo(
+            id = 1, name = "Rick", status = "Alive", species = "Human", type = "",
+            gender = "Male", imageUrl = "url"
+        )
+
+        coEvery { mockApi.getCharacterById(any()) } returns fakeApiResponse
+
+        val actualResult = repository.getCharacterById(1)
+
+        assertThat(actualResult).isInstanceOf(Resource.Success::class.java)
+
+        val actualData = (actualResult as Resource.Success).data
+        assertThat(actualData).isEqualTo(fakeExpectedData)
+    }
+
+
 
 }
 
