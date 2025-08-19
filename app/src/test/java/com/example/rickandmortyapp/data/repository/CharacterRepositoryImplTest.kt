@@ -77,11 +77,11 @@ class CharacterRepositoryImplTest {
     @Test
     fun `getCharacters should emit Loading then Error WHEN api call fails with HttpException`() = runTest {
 
-        val errorBody = "Internal Server Error".toResponseBody(null) //Тело фейковой ошибки
+        val errorBody = "Internal Server Error".toResponseBody(null) //Тело фейковой ошибки. Создаем ResponseBody (errorBody).
 
-        val fakeErrorResponse = Response.error<CharacterResponse>(500,errorBody)
+        val fakeErrorResponse = Response.error<CharacterResponse>(500,errorBody) //Чтобы создать Response, нам нужно ResponseBody
 
-        val httpException = HttpException(fakeErrorResponse)
+        val httpException = HttpException(fakeErrorResponse) //Чтобы создать HttpException, нам нужен Response
 
         val expectedErrorMessage = "Ошибка сервера"
 
@@ -125,7 +125,7 @@ class CharacterRepositoryImplTest {
     }
 
     @Test
-    fun `getCharactersById should return Success with correct character data`() = runTest {
+    fun `getCharacterById should return Success with correct character data`() = runTest {
 
         val fakeApiResponse = Character(
             id = 1, name = "Rick", status = "Alive", species = "Human", type = "",
@@ -146,6 +146,44 @@ class CharacterRepositoryImplTest {
 
         val actualData = (actualResult as Resource.Success).data
         assertThat(actualData).isEqualTo(fakeExpectedData)
+    }
+
+    @Test
+    fun `getCharacterById should return Error WHEN api call fails with HttpException`() = runTest {
+
+        val fakeErrorBody = "Internal Server Error".toResponseBody()
+        val fakeResponse = Response.error<CharacterResponse>(505,fakeErrorBody)
+        val httpException = HttpException(fakeResponse)
+
+        val expectedData = "Ошибка сервера"
+
+        coEvery { mockApi.getCharacterById(any()) } throws httpException
+
+        val actualResult = repository.getCharacterById(1)
+
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedData)
+
+    }
+
+    @Test
+    fun `getCharacterById should return Error WHEN api call fails with IoException`() = runTest {
+
+        val ioException = IOException()
+
+        val expectedData = "Нет подключения к сети"
+
+        coEvery { mockApi.getCharacterById(any()) } throws ioException
+
+        val actualResult = repository.getCharacterById(1)
+
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedData)
+
     }
 
 
