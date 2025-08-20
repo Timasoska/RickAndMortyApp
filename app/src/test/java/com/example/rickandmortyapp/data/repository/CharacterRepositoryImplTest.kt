@@ -186,6 +186,49 @@ class CharacterRepositoryImplTest {
 
     }
 
+    @Test
+    fun `getMultipleCharacters should return Success with correct data`() = runTest {
+
+        val fakeCharacterDto1 = Character(
+            id = 1, name = "Rick", status = "Alive", species = "Human", type = "",
+            gender = "Male", origin = Origin("Earth", ""), location = LocationShort("", ""),
+            image = "url", episode = emptyList(), url = "", created = ""
+        )
+
+        val fakeCharacterDto2 = Character(
+            id = 2, name = "Morty", status = "Alive", species = "Human", type = "",
+            gender = "Male", origin = Origin("Earth", ""), location = LocationShort("", ""),
+            image = "url1", episode = emptyList(), url = "", created = ""
+        )
+
+        val fakeDomainCharacter1 = CharacterInfo(
+            id = 1, name = "Rick", status = "Alive", species = "Human", type = "",
+            gender = "Male", imageUrl = "url"
+        )
+
+        val fakeDomainCharacter2 = CharacterInfo(
+            id = 2, name = "Morty", status = "Alive", species = "Human", type = "",
+            gender = "Male", imageUrl = "url1",
+        )
+
+        val fakeApiResponse = listOf(fakeCharacterDto1, fakeCharacterDto2)
+
+        val expectedData = listOf(fakeDomainCharacter1, fakeDomainCharacter2)
+
+        val idsToRequest = listOf(1, 2)
+
+        coEvery { mockApi.getMultipleCharacters(any()) } returns fakeApiResponse
+
+        val actualResult = repository.getMultipleCharacters(idsToRequest)
+
+        assertThat(actualResult).isInstanceOf(Resource.Success::class.java)
+
+        val actualData = (actualResult as Resource.Success).data
+        assertThat(actualData).isEqualTo(expectedData)
+
+
+    }
+
 
 
 }
