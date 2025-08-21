@@ -226,9 +226,43 @@ class CharacterRepositoryImplTest {
         val actualData = (actualResult as Resource.Success).data
         assertThat(actualData).isEqualTo(expectedData)
 
+    }
+
+    @Test
+    fun `getMultipleCharacters should return Error with HttpException`() = runTest {
+
+        val fakeResponseBody = "Internal Server Error".toResponseBody()
+        val fakeResponse = Response.error<CharacterResponse>(505,fakeResponseBody)
+        val httpException = HttpException(fakeResponse)
+
+        val fakeData = listOf(1,2)
+        val expectedData = "Ошибка сервера"
+
+        coEvery { mockApi.getMultipleCharacters(any()) } throws httpException
+
+        val actualResult = repository.getMultipleCharacters(fakeData)
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedData)
 
     }
 
+    @Test
+    fun `getMultipleCharacters should return Error with IoException`() = runTest {
+
+        val ioException = IOException()
+        val expectedData = "Нет подключения к сети."
+        val fakeData = listOf(1,2)
+
+        coEvery { mockApi.getMultipleCharacters(any()) } throws ioException
+
+        val actualResult = repository.getMultipleCharacters(fakeData)
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedData)
+    }
 
 
 }
