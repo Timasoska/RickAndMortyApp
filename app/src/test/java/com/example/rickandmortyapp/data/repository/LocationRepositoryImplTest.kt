@@ -8,7 +8,6 @@ import com.example.rickandmortyapp.data.remote.RickAndMortyApi
 import com.example.rickandmortyapp.domain.model.LocationInfo
 import com.example.rickandmortyapp.utils.Resource
 import com.google.common.truth.Truth.assertThat
-import io.mockk.awaits
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -18,7 +17,7 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
-import kotlin.math.exp
+
 
 
 class LocationRepositoryImplTest {
