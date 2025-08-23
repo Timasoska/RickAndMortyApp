@@ -206,4 +206,75 @@ class EpisodeRepositoryImplTest {
 
     }
 
+    @Test
+    fun `getMultipleEpisodes should return correct data`() = runTest{
+
+        val fakeIds = listOf(1,2)
+        val fakeDto = Episode(
+            id = 1,
+            name = "name",
+            airDate = "airDate?",
+            episode = "1",
+            characters = listOf(","),
+            url = "url",
+            created = "created"
+        )
+        val fakeApiResponse = listOf(fakeDto)
+        val expectedData = EpisodeInfo(
+            id = 1,
+            name = "name",
+            airDate = "airDate?",
+            episode = "1",
+        )
+
+        coEvery { mockApi.getMultipleEpisodes(any()) } returns fakeApiResponse
+
+        val actualResult = repository.getMultipleEpisodes(fakeIds)
+        assertThat(actualResult).isInstanceOf(Resource.Success::class.java)
+
+        val actualData = (actualResult as Resource.Success).data
+        assertThat(actualData).contains(expectedData)
+    }
+
+    @Test
+    fun `getMultipleEpisodes should return Error when api catch HttpException`() = runTest {
+
+        val errorBody = "Internal Server Error".toResponseBody()
+        val fakeResponse = Response.error<EpisodeResponse>(505,errorBody)
+        val httpException = HttpException(fakeResponse)
+
+        val fakeIds = listOf(1,2)
+        val expectedMessage = "Ошибка сервера"
+
+        coEvery { mockApi.getMultipleEpisodes(any()) } throws httpException
+
+        val actualResult = repository.getMultipleEpisodes(fakeIds)
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedMessage)
+    }
+
+    @Test
+    fun `getMultipleEpisodes should return Error when api catch IoException`() = runTest {
+
+        val ioException = IOException()
+        val expectedData = "Нет подключения к сети"
+        val fakeData = listOf(1,2)
+
+        coEvery { mockApi.getMultipleEpisodes(any()) } throws ioException
+
+        val actualResult = repository.getMultipleEpisodes(fakeData)
+        assertThat(actualResult).isInstanceOf(Resource.Error::class.java)
+
+        val actualData = (actualResult as Resource.Error).message
+        assertThat(actualData).contains(expectedData)
+
+    }
+
+
+
+
+
+
 }
